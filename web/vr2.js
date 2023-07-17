@@ -370,12 +370,25 @@ function main(cvd, session, refSpace) {
 
         let testedPt = m4.transformPoint(cMat, new Float32Array([0, 0, 0, 1.0]));
 
+	let corner000 = m4.transformPoint(modelMat, new Float32Array([0, 0, 0, 1.0]));
+	let corner111 = m4.transformPoint(modelMat, new Float32Array([1.0, 1.0, 1.0, 1.0]));
+	// console.log(corner000);
+	
+	for(let i = 0 ; i<3 ; i++){
+	    if(corner000[i] > testedPt[i] || corner111[i] < testedPt[i]){
+		return null;
+	    }
+	    // console.log(corner000[i],testedPt[i],corner111[i]);
+	}
+
+	
         let nearestAddr = Object.keys(cells).filter(
             function (addr) {
                 return (cells[addr]
                     && cells[addr].domElem); // && cells[addr].codePt
             }).map(function (addr) {
-            let cntr = cells[addr].center;
+		let cntr = cells[addr].center;
+		
             if (cntr.length == 4) {
                 let pC = m4.transformPoint(modelMat, cells[addr].center);
                 return {caddr: addr, dst: m4.distance(pC, testedPt)};
@@ -384,6 +397,9 @@ function main(cvd, session, refSpace) {
         }).sort(function (a, b) {
             return (a.dst - b.dst);
         })[0].caddr;
+	// console.table(Object.keys(cells).map(addr => cells[addr].center));
+	// debugger;
+	
         return nearestAddr;
 
     };
